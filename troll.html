@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rayen The Bird 🕊️💀</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    overflow: hidden;
+    background: #0e0020;
+    font-family: 'Nunito', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    cursor: default; /* FIXED: Now you can see the mouse at the start */
+  }
+
+  #stars-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+  }
+
+  .phase { display: none; position: fixed; z-index: 10; }
+  .phase.active { display: block; }
+
+  /* ---- PHASE 0: Intro ---- */
+  #phase-intro {
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #fff;
+    width: 520px;
+  }
+
+  #phase-intro h1 {
+    font-family: 'Bangers', cursive;
+    font-size: 56px;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.6);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+  }
+
+  #phase-intro .subtitle {
+    font-size: 14px;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  #phase-intro .story-intro {
+    font-size: 14px;
+    color: #c4b5fd;
+    line-height: 1.75;
+    margin-bottom: 28px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 14px;
+    padding: 16px 20px;
+    text-align: left;
+  }
+
+  #phase-intro .story-intro strong { color: #ffd700; }
+
+  #start-btn {
+    font-family: 'Bangers', cursive;
+    font-size: 22px;
+    letter-spacing: 2px;
+    padding: 14px 44px;
+    background: rgba(255,215,0,0.12);
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  #start-btn:hover {
+    background: rgba(255,215,0,0.28);
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255,215,0,0.4);
+  }
+
+  /* ---- BIRD ---- */
+  #bird {
+    position: fixed;
+    width: 70px; height: 70px;
+    z-index: 100;
+    pointer-events: none;
+    font-size: 54px;
+    display: none;
+    filter: drop-shadow(0 0 14px rgba(255,100,100,0.55));
+  }
+
+  #bird.flip { transform: scaleX(-1); }
+
+  /* ---- BROTHER BIRD ---- */
+  #brother {
+    position: fixed;
+    width: 70px; height: 70px;
+    z-index: 100;
+    pointer-events: none;
+    font-size: 54px;
+    display: none;
+    filter: drop-shadow(0 0 18px rgba(255,0,0,0.8));
+  }
+
+  #brother.flip { transform: scaleX(-1); }
+
+  /* ---- FAKE CURSOR ---- */
+  #fake-cursor {
+    position: fixed;
+    font-size: 28px;
+    z-index: 200;
+    pointer-events: none;
+    display: none;
+  }
+
+  #fake-cursor.stolen {
+    transition: left 1.4s cubic-bezier(.4,0,.2,1), top 1.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ---- BOX (the mysterious box) ---- */
+  #mystery-box {
+    position: fixed;
+    font-size: 72px;
+    z-index: 50;
+    display: none;
+    pointer-events: none;
+    filter: drop-shadow(0 0 30px rgba(255,215,0,0.5));
+  }
+
+  #mystery-box.glow {
+    animation: boxGlow 1s ease infinite alternate;
+  }
+
+  @keyframes boxGlow {
+    from { filter: drop-shadow(0 0 20px rgba(255,215,0,0.4)); }
+    to   { filter: drop-shadow(0 0 60px rgba(255,215,0,1)); }
+  }
+
+  /* ---- BRANCH (top right) ---- */
+  #branch {
+    position: fixed;
+    right: 60px; top: 120px;
+    width: 220px; height: 18px;
+    background: linear-gradient(180deg, #6b3d1e, #3d1f0a);
+    border-radius: 9px;
+    z-index: 50;
+    display: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  #branch::before {
+    content: '';
+    position: absolute;
+    left: -15px; top: 0;
+    width: 18px; height: 18px;
+    background: #4a2810;
+    border-radius: 50%;
+  }
+
+  /* ---- ROCK ---- */
+  #rock {
+    position: fixed;
+    font-size: 36px;
+    z-index: 200;
+    display: none;
+    pointer-events: none;
+    cursor: pointer;
+    pointer-events: all;
+    filter: drop-shadow(0 0 10px rgba(200,200,255,0.6));
+    animation: rockPulse 0.8s ease infinite alternate;
+  }
+
+  @keyframes rockPulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.18); }
+  }
+
+  /* ---- SPEECH BUBBLE ---- */
+  #speech {
+    position: fixed;
+    right: 55px; top: 40px;
+    background: white;
+    border: 2px solid #2d1b69;
+    border-radius: 16px 16px 4px 16px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1a0a2e;
+    max-width: 260px;
+    line-height: 1.6;
+    display: none;
+    z-index: 150;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* Brother speech (bottom left) */
+  #bro-speech {
+    position: fixed;
+    left: 30px; bottom: 100px;
+    background: #1a0a2e;
+    border: 2px solid #ef4444;
+    border-radius: 16px 16px 16px 4px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #fca5a5;
+    max-width: 270px;
+    line-height: 1.6;
+    display: none;
+    z-index: 150;
+    box-shadow: 0 8px 32px rgba(239,68,68,0.3);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.6); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---- MESSAGE BOX (Rayen's demand) ---- */
+  #msg-box {
+    position: fixed;
+    right: 55px; top: 175px;
+    background: #1a0a2e;
+    border: 2px solid #7c3aed;
+    border-radius: 16px;
+    padding: 20px;
+    width: 285px;
+    display: none;
+    z-index: 150;
+    box-shadow: 0 8px 40px rgba(124,58,237,0.3);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  #msg-box p { font-size: 13px; color: #c4b5fd; margin-bottom: 10px; font-weight: 700; }
+
+  #msg-box textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid #7c3aed;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    resize: none;
+    outline: none;
+  }
+
+  #msg-box textarea:focus { border-color: #a855f7; }
+
+  #submit-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: white;
+    font-family: 'Bangers', cursive;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  #submit-btn:hover { opacity: 0.85; }
+
+  /* ---- BRO MESSAGE BOX ---- */
+  #bro-msg-box {
+    position: fixed;
+    left: 30px; bottom: 220px;
+    background: #1a0a2e;
+    border: 2px solid #ef4444;
+    border-radius: 16px;
+    padding: 20px;
+    width: 285px;
+    display: none;
+    z-index: 150;
+    box-shadow: 0 8px 40px rgba(239,68,68,0.3);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  #bro-msg-box p { font-size: 13px; color: #fca5a5; margin-bottom: 10px; font-weight: 700; }
+
+  #bro-msg-box textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid #ef4444;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    resize: none;
+    outline: none;
+  }
+  #bro-msg-box textarea:focus { border-color: #f87171; }
+
+  #bro-submit-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #b91c1c, #ef4444);
+    color: white;
+    font-family: 'Bangers', cursive;
+    font-size: 18px;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  #bro-submit-btn:hover { opacity: 0.85; }
+
+  /* ---- FINAL ---- */
+  #final-msg {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(145deg, #1a0a2e, #0e0020);
+    border: 2px solid #ffd700;
+    border-radius: 28px;
+    padding: 48px 56px;
+    text-align: center;
+    color: white;
+    display: none;
+    z-index: 300;
+    box-shadow: 0 0 80px rgba(255,215,0,0.35), 0 0 160px rgba(255,215,0,0.1);
+    animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
+    max-width: 460px;
+    width: 90vw;
+  }
+
+  #final-msg .big-emojis { font-size: 52px; margin-bottom: 14px; display: block; }
+
+  #final-msg h2 {
+    font-family: 'Bangers', cursive;
+    font-size: 28px;
+    color: #ffd700;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  #final-msg .eid-text {
+    font-family: 'Bangers', cursive;
+    font-size: 38px;
+    color: #ffd700;
+    letter-spacing: 3px;
+    text-shadow: 0 0 30px rgba(255,215,0,0.8);
+    margin: 12px 0;
+    display: block;
+  }
+
+  #final-msg p { font-size: 14px; color: #c4b5fd; line-height: 1.7; }
+
+  #final-msg .footnote {
+    margin-top: 16px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+
+  /* ---- CHAPTER FLASH ---- */
+  #chapter-text {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bangers', cursive;
+    font-size: 38px;
+    color: #ff6b6b;
+    letter-spacing: 3px;
+    text-shadow: 0 0 40px rgba(255,107,107,0.7);
+    z-index: 250;
+    display: none;
+    text-align: center;
+    pointer-events: none;
+    animation: fadeFlash 2s ease forwards;
+    max-width: 80vw;
+    line-height: 1.3;
+  }
+
+  #chapter-text.gold { color: #ffd700; text-shadow: 0 0 40px rgba(255,215,0,0.8); }
+  #chapter-text.red  { color: #ef4444; text-shadow: 0 0 40px rgba(239,68,68,0.8); }
+  #chapter-text.purple { color: #a855f7; text-shadow: 0 0 40px rgba(168,85,247,0.8); }
+
+  @keyframes fadeFlash {
+    0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.7); }
+    25%  { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+    70%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%,-50%) scale(0.92); }
+  }
+
+  /* ---- PARTICLES ---- */
+  .particle {
+    position: fixed;
+    font-size: 22px;
+    z-index: 200;
+    pointer-events: none;
+    animation: flyUp 1.1s ease-out forwards;
+  }
+
+  @keyframes flyUp {
+    from { opacity: 1; transform: translateY(0) rotate(0deg); }
+    to   { opacity: 0; transform: translateY(-120px) rotate(25deg); }
+  }
+
+  .particle.fall {
+    animation: fallDown2 1s ease-in forwards;
+  }
+
+  @keyframes fallDown2 {
+    from { opacity: 1; transform: translateY(0) rotate(0deg); }
+    to   { opacity: 0; transform: translateY(100px) rotate(-30deg); }
+  }
+
+  /* Dead mouse */
+  .mouse-dead {
+    position: fixed; font-size: 30px; z-index: 30; pointer-events: none;
+    animation: fallDown 0.6s ease-out forwards;
+  }
+  @keyframes fallDown {
+    from { transform: translateY(0) rotate(0deg); opacity: 1; }
+    to   { transform: translateY(70px) rotate(35deg); opacity: 0; }
+  }
+
+  /* Dead bird */
+  .bird-dead {
+    position: fixed; font-size: 44px; z-index: 200; pointer-events: none;
+    animation: birdFall 1.2s ease-in forwards;
+  }
+  @keyframes birdFall {
+    0%   { opacity: 1; transform: rotate(0deg) translateY(0); }
+    40%  { opacity: 1; transform: rotate(-20deg) translateY(-20px); }
+    100% { opacity: 0; transform: rotate(90deg) translateY(200px); }
+  }
+
+  /* Key */
+  #key {
+    position: fixed;
+    font-size: 44px;
+    z-index: 200;
+    display: none;
+    pointer-events: all;
+    cursor: pointer;
+    filter: drop-shadow(0 0 16px rgba(255,215,0,0.9));
+    animation: keyFloat 1s ease infinite alternate;
+  }
+  @keyframes keyFloat {
+    from { transform: translateY(0) rotate(-10deg); }
+    to   { transform: translateY(-12px) rotate(10deg); }
+  }
+
+  /* Progress */
+  #progress {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 150;
+  }
+  .pdot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    transition: all 0.35s;
+  }
+  .pdot.done   { background: #7c3aed; }
+  .pdot.active { background: #ffd700; transform: scale(1.5); }
+
+  /* Chapter label */
+  #chapter-label {
+    position: fixed;
+    bottom: 46px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bangers', cursive;
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 150;
+    text-align: center;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- INTRO -->
+<div id="phase-intro" class="phase active">
+  <h1>🕊️ RAYEN THE BIRD 🕊️</h1>
+  <div class="subtitle">A Dramatic Love Story in 5 Acts 💀</div>
+  <div class="story-intro">
+    She finally reached the <strong>mysterious box</strong>… hands trembling, excitement MAX LEVEL…<br>
+    But as soon as she touched it — <em>POOOF!</em><br><br>
+    <strong>"Find the key, brave heart 🗝️✨"</strong><br><br>
+    And then, out of the sky, flying like a cracked Fortnite player…<br>
+    came <strong>Rayen the bird.</strong>
+  </div>
+  <button id="start-btn">START THE MISSION ▶</button>
+</div>
+
+<!-- ELEMENTS -->
+<div id="bird">🕊️</div>
+<div id="brother">🕊️</div>
+<div id="fake-cursor">🖱️</div>
+<div id="branch"></div>
+<div id="mystery-box">📦</div>
+<div id="rock">🪨</div>
+<div id="key">🗝️</div>
+
+<!-- SPEECH BUBBLES -->
+<div id="speech"></div>
+<div id="bro-speech"></div>
+
+<!-- MESSAGE BOXES -->
+<div id="msg-box">
+  <p>✍️ Write me something cute… with the word <strong style="color:#ffd700">"love"</strong> in it 😈</p>
+  <textarea id="input-msg" rows="3" placeholder="type here…"></textarea>
+  <button id="submit-btn">SUBMIT 📝</button>
+</div>
+
+<div id="bro-msg-box">
+  <p>😭 Tell him you <strong style="color:#fca5a5">loved Rayen</strong> and tell him to drop the key 🗝️</p>
+  <textarea id="bro-input-msg" rows="3" placeholder="speak to the brother…"></textarea>
+  <button id="bro-submit-btn">SEND MESSAGE 📨</button>
+</div>
+
+<!-- CHAPTER FLASH -->
+<div id="chapter-text"></div>
+
+<!-- FINAL -->
+<div id="final-msg">
+  <span class="big-emojis">📦✨🕊️💔</span>
+  <h2>THE BOX IS OPEN.</h2>
+  <p>Light shining… angels singing…<br>And inside:</p>
+  <span class="eid-text">✨ عيدك مبروك ✨</span>
+  <p>with a tiny paper that says:<br>
+  <em style="color:#ffd700">"Rayen would've wanted you to see this 💀💔😂"</em></p>
+  <p class="footnote">— Rayen (from beyond 💀) &nbsp;•&nbsp; his brother (crying in the corner 😭)</p>
+</div>
+
+<!-- CHAPTER LABEL + PROGRESS -->
+<div id="chapter-label">Act 1: The Arrival</div>
+<div id="progress">
+  <div class="pdot active" id="d0"></div>
+  <div class="pdot" id="d1"></div>
+  <div class="pdot" id="d2"></div>
+  <div class="pdot" id="d3"></div>
+  <div class="pdot" id="d4"></div>
+  <div class="pdot" id="d5"></div>
+</div>
+
+<script>
+// ---- STARS ----
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+const stars = Array.from({length:140}, () => ({
+  x: Math.random()*canvas.width,
+  y: Math.random()*canvas.height,
+  r: Math.random()*1.6+0.3,
+  a: Math.random(),
+  speed: Math.random()*0.012+0.004
+}));
+function drawStars() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  stars.forEach(s => {
+    s.a += s.speed;
+    ctx.globalAlpha = 0.25 + 0.75*Math.abs(Math.sin(s.a));
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// ---- GLOBALS ----
+let mouseX = window.innerWidth/2, mouseY = window.innerHeight/2;
+let fakeCursorFollowing = true;
+let currentPhase = 0;
+
+const bird      = document.getElementById('bird');
+const brother   = document.getElementById('brother');
+const fakeCursor= document.getElementById('fake-cursor');
+const speech    = document.getElementById('speech');
+const broSpeech = document.getElementById('bro-speech');
+const msgBox    = document.getElementById('msg-box');
+const broMsgBox = document.getElementById('bro-msg-box');
+const branch    = document.getElementById('branch');
+const mysteryBox= document.getElementById('mystery-box');
+const rockEl    = document.getElementById('rock');
+const keyEl     = document.getElementById('key');
+const finalMsg  = document.getElementById('final-msg');
+const chapterText= document.getElementById('chapter-text');
+const chapLabel = document.getElementById('chapter-label');
+
+// ---- MOUSE TRACK ----
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  if (fakeCursorFollowing) {
+    fakeCursor.style.left = e.clientX+'px';
+    fakeCursor.style.top  = e.clientY+'px';
+  }
+});
+
+// ---- HELPERS ----
+function setPhase(n) {
+  currentPhase = n;
+  const labels = [
+    'Act 0: The Box','Act 1: The Arrival','Act 2: Cursor Stolen',
+    'Act 3: The Challenge','Act 4: The Rock','Act 5: The Brother','Act 6: The Box Opens'
+  ];
+  chapLabel.textContent = labels[n] || '';
+  document.querySelectorAll('.pdot').forEach((d,i) => {
+    d.className = 'pdot'+(i<n?' done':i===n?' active':'');
+  });
+}
+
+function flashText(msg, color, duration, cb) {
+  chapterText.textContent = msg;
+  chapterText.className = color || '';
+  chapterText.style.display = 'block';
+  chapterText.style.animation = 'none';
+  void chapterText.offsetWidth;
+  const dur = duration || 2000;
+  chapterText.style.animation = `fadeFlash ${dur/1000}s ease forwards`;
+  setTimeout(() => {
+    chapterText.style.display = 'none';
+    if (cb) cb();
+  }, dur);
+}
+
+function spawnParticles(emojis, x, y, count=8, fallMode=false) {
+  for (let i=0; i<count; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      p.className = 'particle' + (fallMode ? ' fall' : '');
+      p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      p.style.left  = (x + Math.random()*70-35)+'px';
+      p.style.top   = (y + Math.random()*50-25)+'px';
+      p.style.animationDelay = Math.random()*0.2+'s';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1300);
+    }, i*90);
+  }
+}
+
+function setSpeech(msg, show=true) {
+  speech.innerHTML = msg;
+  speech.style.display = show?'block':'none';
+  if (show) { speech.style.animation='none'; void speech.offsetWidth; speech.style.animation='popIn 0.3s cubic-bezier(.34,1.56,.64,1)'; }
+}
+
+function setBroSpeech(msg, show=true) {
+  broSpeech.innerHTML = msg;
+  broSpeech.style.display = show?'block':'none';
+  if (show) { broSpeech.style.animation='none'; void broSpeech.offsetWidth; broSpeech.style.animation='popIn 0.3s cubic-bezier(.34,1.56,.64,1)'; }
+}
+
+function moveBird(x, y, flip=false, dur='1.2s') {
+  bird.style.transition = `left ${dur} cubic-bezier(.4,0,.2,1), top ${dur} cubic-bezier(.4,0,.2,1)`;
+  bird.style.left = x+'px'; bird.style.top = y+'px';
+  bird.classList.toggle('flip', flip);
+}
+
+function moveBrother(x, y, flip=false, dur='1.2s') {
+  brother.style.transition = `left ${dur} cubic-bezier(.4,0,.2,1), top ${dur} cubic-bezier(.4,0,.2,1)`;
+  brother.style.left = x+'px'; brother.style.top = y+'px';
+  brother.classList.toggle('flip', flip);
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r,ms)); }
+
+// ---- START ----
+document.getElementById('start-btn').addEventListener('click', () => {
+  document.getElementById('phase-intro').style.display = 'none';
+  document.body.style.cursor = 'none'; // Hides real cursor now that game started
+  fakeCursor.style.display = 'block';
+  fakeCursor.style.left = mouseX+'px';
+  fakeCursor.style.top  = mouseY+'px';
+  runAct0();
+});
+
+// ============================
+//  ACT 0 — The Box Appears
+// ============================
+async function runAct0() {
+  setPhase(0);
+
+  // Show mystery box in center
+  const bx = window.innerWidth/2 - 40, by = window.innerHeight/2 - 40;
+  mysteryBox.style.left = bx+'px';
+  mysteryBox.style.top  = by+'px';
+  mysteryBox.style.display = 'block';
+  mysteryBox.classList.add('glow');
+
+  await delay(500);
+  spawnParticles(['✨','⭐','💫'], bx+40, by+40, 8);
+
+  await delay(1500);
+  runAct1();
+}
+
+// ============================
+//  ACT 1 — Rayen Arrives
+// ============================
+async function runAct1() {
+  setPhase(1);
+  mysteryBox.classList.remove('glow');
+
+  // Bird off-screen
+  bird.style.display = 'block';
+  bird.style.transition = 'none';
+  bird.style.left = '-100px';
+  bird.style.top  = (window.innerHeight/2)+'px';
+
+  flashText('ACT I: RAYEN HAS ARRIVED 🕊️', 'gold', 2200, async () => {
+    branch.style.display = 'block';
+    await delay(300);
+
+    // Fly to center dramatically
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    moveBird(cx-35, cy-100, false, '1.4s');
+    await delay(1500);
+
+    setSpeech('"Oh? You found the box… 😈<br>Too bad. You\'ll need the <b>key</b> first."');
+    await delay(200);
+    spawnParticles(['🪨','❤️','✨'], cx, cy, 6);
+
+    await delay(2500);
+    setSpeech('"Also…<br>Gonna need that cursor. 🖱️ 😈"');
+    await delay(2000);
+
+    runAct2();
+  });
+}
+
+// ============================
+//  ACT 2 — Cursor Stolen
+// ============================
+async function runAct2() {
+  setPhase(2);
+
+  // Bird dives at cursor
+  const cxPos = parseFloat(fakeCursor.style.left);
+  const cyPos = parseFloat(fakeCursor.style.top);
+  moveBird(cxPos-30, cyPos-40, false, '0.7s');
+  await delay(800);
+
+  // STEAL
+  fakeCursorFollowing = false;
+  const branchX = window.innerWidth - 200;
+  const branchY = 105;
+
+  fakeCursor.classList.add('stolen');
+  fakeCursor.style.left = (branchX+65)+'px';
+  fakeCursor.style.top  = (branchY+30)+'px';
+  moveBird(branchX-10, branchY-25, true, '1.3s');
+
+  await delay(1500);
+
+  // Shoot the mouse
+  const dead = document.createElement('div');
+  dead.className = 'mouse-dead';
+  dead.textContent = '🐭💀';
+  dead.style.left = (branchX+65)+'px';
+  dead.style.top  = (branchY+30)+'px';
+  document.body.appendChild(dead);
+  setTimeout(() => dead.remove(), 700);
+
+  spawnParticles(['💥','❌'], branchX+65, branchY+30, 5);
+
+  flashText('HE SHOT THE MOUSE 🐭💀🔫', 'red', 2200, async () => {
+    setSpeech('"Hmm… I dunno if I should return this… 😈<br>Before I do — write me something cute."');
+    await delay(2000);
+    setSpeech('"Include the word <b style=\'color:#ffd700\'>love</b> or I\'m keeping it. 😈🕊️"');
+    await delay(1500);
+    document.body.style.cursor = 'default'; // Let them use their real mouse to type
+    msgBox.style.display = 'block';
+    setPhase(3);
+  });
+}
+
+// ============================
+//  ACT 3 — The Love Message
+// ============================
+document.getElementById('submit-btn').addEventListener('click', async () => {
+  const msg = document.getElementById('input-msg').value.toLowerCase().trim();
+
+  if (!msg.includes('love')) {
+    setSpeech('"Lie detector: 92% FAKE 😭<br>Say it with <b style=\'color:#ffd700\'>LOVE</b> bro."');
+    const bx = window.innerWidth - 200, by = 105;
+    spawnParticles(['❌','😭'], bx, by, 5);
+    return;
+  }
+
+  // Accepted!
+  msgBox.style.display = 'none';
+  document.body.style.cursor = 'none'; // Hide real mouse again
+  setSpeech('"…oh. 😳<br>…ok that was kinda cute ngl 💛"');
+  setPhase(4);
+
+  const branchX = window.innerWidth - 200, branchY = 105;
+  spawnParticles(['💛','✨','🪨','⭐','💖'], branchX, branchY, 12);
+  await delay(1500);
+
+  flashText('RAYEN IS EMOTIONAL 😭💔', 'purple', 2200, async () => {
+    setSpeech('"Fine. I\'ll drop the cursor.<br>But first… you know what happens next. 😈"');
+    await delay(2200);
+
+    // Drop the cursor + bird comes toward center
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    moveBird(cx-40, cy-60, false, '1.4s');
+    fakeCursor.style.transition = 'left 1.4s, top 1.4s';
+    fakeCursor.style.left = (cx+20)+'px';
+    fakeCursor.style.top  = (cy+20)+'px';
+
+    await delay(1700);
+    // Return cursor to user
+    document.body.style.cursor = 'default';
+    fakeCursor.style.display = 'none';
+    setSpeech('', false);
+
+    runAct4_RockTime();
+  });
+});
+
+// ============================
+//  ACT 4 — She Picks Up A Rock
+// ============================
+async function runAct4_RockTime() {
+  setPhase(4);
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+
+  await delay(500);
+  flashText('SHE PICKED UP A ROCK 🪨\nCLICK IT TO THROW', 'gold', 2000, async () => {
+    // Show rock near user position
+    rockEl.style.left = (cx - 20)+'px';
+    rockEl.style.top  = (cy + 60)+'px';
+    rockEl.style.display = 'block';
+
+    rockEl.addEventListener('click', throwRock, {once: true});
+  });
+}
+
+async function throwRock() {
+  rockEl.style.display = 'none';
+
+  // Rock flies at bird
+  const birdX = parseFloat(bird.style.left)+30;
+  const birdY = parseFloat(bird.style.top)+30;
+
+  spawnParticles(['🪨','💥'], birdX, birdY, 8);
+
+  // Dead bird dramatic
+  const deadBird = document.createElement('div');
+  deadBird.className = 'bird-dead';
+  deadBird.textContent = '🕊️';
+  deadBird.style.left = birdX+'px';
+  deadBird.style.top  = birdY+'px';
+  document.body.appendChild(deadBird);
+
+  bird.style.display = 'none';
+  branch.style.display = 'none';
+
+  spawnParticles(['💔','✨','😭'], birdX, birdY, 10);
+
+  await delay(600);
+  flashText('RAYEN FELL 😭 LIKE A FALLEN DISNEY PRINCE 🕊️💔', 'red', 2800, async () => {
+    setTimeout(() => deadBird.remove(), 500);
+
+    await delay(1000);
+    
+    // Key drops
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    keyEl.style.left = (cx-22)+'px';
+    keyEl.style.top  = (cy+40)+'px';
+    keyEl.style.display = 'block';
+    spawnParticles(['🗝️','✨'], cx, cy, 5);
+
+    await delay(1500);
+    runAct5_Brother();
+  });
+}
+
+// ============================
+//  ACT 5 — The Brother
+// ============================
+async function runAct5_Brother() {
+  setPhase(5);
+  keyEl.style.display = 'none';
+
+  // Brother enters from top
+  brother.textContent = '🕊️';
+  brother.style.display = 'block';
+  brother.style.transition = 'none';
+  brother.style.left = (window.innerWidth/2 - 35)+'px';
+  brother.style.top  = '-100px';
+  brother.style.filter = 'drop-shadow(0 0 20px rgba(255,0,0,0.9)) hue-rotate(340deg) saturate(3)';
+
+  await delay(300);
+  flashText('🕊️ RAYEN\'S BROTHER APPEARED 🕊️\nRED EYES. FULL OF EMOTIONAL DAMAGE.', 'red', 2600, async () => {
+    moveBrother(window.innerWidth/2 - 35, window.innerHeight/2 - 80, false, '1.2s');
+    await delay(1400);
+
+    setBroSpeech('"YOU… you killed Rayen… my only brother 😭🕊️💔<br>How could you?!?"');
+    spawnParticles(['😭','💔','🕊️'], window.innerWidth/2, window.innerHeight/2, 8);
+
+    await delay(2800);
+    setBroSpeech('"I will NOT drop the key until you explain yourself 😤"');
+    await delay(2000);
+
+    broMsgBox.style.display = 'block';
+  });
+}
+
+// ---- BRO SUBMIT ----
+document.getElementById('bro-submit-btn').addEventListener('click', async () => {
+  const msg = document.getElementById('bro-input-msg').value.toLowerCase().trim();
+
+  const hasLove = msg.includes('love') || msg.includes('loved');
+  const hasKey  = msg.includes('key') || msg.includes('drop') || msg.includes('give');
+
+  if (!hasLove) {
+    setBroSpeech('"You didn\'t even say you loved him 😭 Try again."');
+    spawnParticles(['😭','❌'], 100, window.innerHeight-200, 4);
+    return;
+  }
+
+  if (!hasKey) {
+    setBroSpeech('"Ok ok you loved him… but you didn\'t ask for the key 🙄 Say it properly."');
+    spawnParticles(['🤦','😑'], 100, window.innerHeight-200, 4);
+    return;
+  }
+
+  // Accepted!
+  broMsgBox.style.display = 'none';
+  setPhase(5);
+
+  spawnParticles(['😭','💔','🕊️'], window.innerWidth/2, window.innerHeight/2, 10);
+
+  setBroSpeech('"…fine. 😭<br>He… he would\'ve wanted this.<br><em>Rayen… she didn\'t deserve you.</em>"');
+
+  await delay(3000);
+  setBroSpeech('', false);
+
+  // Brother drops key and flies away
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  keyEl.style.left = (cx-22)+'px';
+  keyEl.style.top  = (cy+40)+'px';
+  keyEl.style.display = 'block';
+  spawnParticles(['🗝️','✨','💛'], cx, cy, 8);
+
+  moveBrother(-200, window.innerHeight/2 - 80, true, '1.5s');
+  await delay(1600);
+  brother.style.display = 'none';
+
+  flashText('THE KEY HAS BEEN DROPPED 🗝️✨\nCLICK IT TO OPEN', 'gold', 2500, async () => {
+    keyEl.addEventListener('click', openTheBox, {once: true});
+  });
+});
+
+// ============================
+//  ACT 6 — The Box Opens
+// ============================
+async function openTheBox() {
+  keyEl.style.display = 'none';
+  setPhase(6);
+
+  // Fly key to box
+  const bx = window.innerWidth/2 - 40, by = window.innerHeight/2 - 40;
+  spawnParticles(['✨','🗝️','💫','⭐'], bx+40, by+40, 16);
+
+  await delay(400);
+  mysteryBox.textContent = '📭';
+  mysteryBox.style.display = 'block';
+  mysteryBox.classList.add('glow');
+  spawnParticles(['🌟','✨','💛','⭐','🎉'], bx+40, by+40, 20);
+
+  await delay(400);
+  flashText('✨ THE BOX IS OPEN ✨', 'gold', 2400, async () => {
+    mysteryBox.style.display = 'none';
+
+    // Final fireworks
+    for (let i = 0; i < 30; i++) {
+      setTimeout(() => {
+        spawnParticles(['⭐','✨','💛','🌟','🎊','💖'], 
+          Math.random()*window.innerWidth, 
+          Math.random()*window.innerHeight, 2);
+      }, i*80);
+    }
+
+    await delay(1000);
+    finalMsg.style.display = 'block';
+  });
+}
+
+// ---- MISC ----
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
